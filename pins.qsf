@@ -1,0 +1,67 @@
+# ---------------------------------------------------------------------------
+# pins.qsf - DE1-SoC pin assignments (Cyclone V 5CSEMA5F31C6N)
+#
+# Paste into your project .qsf, or:
+#   Assignments -> Import Assignments -> select this file
+#
+# LED map (matches traffic_light_top.v exactly - the original design's table
+# and RTL disagreed, which is how the conflicting-greens bug went unnoticed):
+#   LEDR[0] NS red     LEDR[3] EW red
+#   LEDR[1] NS yellow  LEDR[4] EW yellow
+#   LEDR[2] NS green   LEDR[5] EW green
+#   LEDR[6] WALK
+# ---------------------------------------------------------------------------
+
+set_global_assignment -name FAMILY "Cyclone V"
+set_global_assignment -name DEVICE 5CSEMA5F31C6N
+set_global_assignment -name TOP_LEVEL_ENTITY traffic_light_top
+
+set_global_assignment -name VERILOG_FILE rtl/traffic_light_top.v
+set_global_assignment -name VERILOG_FILE rtl/traffic_fsm.v
+set_global_assignment -name VERILOG_FILE rtl/clk_div.v
+set_global_assignment -name VERILOG_FILE rtl/debouncer.v
+set_global_assignment -name VERILOG_FILE rtl/sync_2ff.v
+set_global_assignment -name VERILOG_FILE rtl/reset_sync.v
+set_global_assignment -name VERILOG_FILE rtl/seven_seg.v
+set_global_assignment -name SDC_FILE constraints/traffic.sdc
+
+# ---- clock ----------------------------------------------------------------
+set_location_assignment PIN_AF14 -to CLOCK_50
+
+# ---- push-buttons (active low) --------------------------------------------
+set_location_assignment PIN_AA14 -to KEY0
+set_location_assignment PIN_AA15 -to KEY1
+
+# ---- red LEDs -------------------------------------------------------------
+set_location_assignment PIN_V16  -to LEDR[0]
+set_location_assignment PIN_W16  -to LEDR[1]
+set_location_assignment PIN_V17  -to LEDR[2]
+set_location_assignment PIN_V18  -to LEDR[3]
+set_location_assignment PIN_W17  -to LEDR[4]
+set_location_assignment PIN_W19  -to LEDR[5]
+set_location_assignment PIN_Y19  -to LEDR[6]
+set_location_assignment PIN_W20  -to LEDR[7]
+set_location_assignment PIN_W21  -to LEDR[8]
+set_location_assignment PIN_Y21  -to LEDR[9]
+
+# ---- HEX0 seven-segment (active low) --------------------------------------
+set_location_assignment PIN_AE26 -to HEX0[0]
+set_location_assignment PIN_AE27 -to HEX0[1]
+set_location_assignment PIN_AE28 -to HEX0[2]
+set_location_assignment PIN_AG27 -to HEX0[3]
+set_location_assignment PIN_AF28 -to HEX0[4]
+set_location_assignment PIN_AG28 -to HEX0[5]
+set_location_assignment PIN_AH28 -to HEX0[6]
+
+# ---- I/O standard ---------------------------------------------------------
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CLOCK_50
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY0
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY1
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LEDR[*]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[*]
+
+# ---- FSM encoding experiment ----------------------------------------------
+# Compile once with each and record ALMs / Fmax for the CV bullet.
+#   set_global_assignment -name STATE_MACHINE_PROCESSING "ONE-HOT"
+#   set_global_assignment -name STATE_MACHINE_PROCESSING "MINIMAL BITS"
+set_global_assignment -name STATE_MACHINE_PROCESSING "AUTO"
